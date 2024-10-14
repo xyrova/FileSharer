@@ -31,7 +31,7 @@ Backend Setup (Spring Boot)
 
     bash
 
-git clone https://github.com/nahcol10/file-sharer.git
+git clone [https://github.com/nahcol10/file-sharer.git](https://github.com/nahcol10/FileSharer.git)
 cd file-sharer/backend
 
 Configure application properties: In src/main/resources/application.properties, you can update settings if needed, especially for storage locations and database configurations. For example:
