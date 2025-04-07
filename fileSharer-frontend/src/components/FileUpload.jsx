@@ -16,7 +16,7 @@ const FileUpload = () => {
   const handleUpload = async (event) => {
     event.preventDefault();
     if (!file) {
-      setError("Please select a file to upload.");
+      setError(import.meta.env.VITE_UPLOAD_ERROR_NO_FILE);
       return;
     }
 
@@ -25,16 +25,16 @@ const FileUpload = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8080/upload-file",
+        `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_UPLOAD_ENDPOINT}`,
         formData
       );
       if (response.data) {
         setPin(response.data);
-        setMessage("File uploaded successfully! ");
+        setMessage(import.meta.env.VITE_UPLOAD_SUCCESS_MESSAGE);
         setError(null);
       }
     } catch (err) {
-      setError("Failed to upload file.");
+      setError(import.meta.env.VITE_UPLOAD_ERROR_FAILED);
       setMessage("");
       console.error("Upload error:", err);
     }

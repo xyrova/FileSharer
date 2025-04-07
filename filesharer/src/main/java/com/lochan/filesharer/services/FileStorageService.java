@@ -1,28 +1,60 @@
 package com.lochan.filesharer.services;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.lochan.filesharer.model.FileEntity;
 import com.lochan.filesharer.repository.FileRepository;
 
+import jakarta.annotation.PostConstruct;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Random;
+import org.slf4j.Logger;
+import java.nio.file.Path;
 
 @Service
 public class FileStorageService {
 
-    // Directory where the files will be saved
-    private static final String STORAGE_DIRECTORY = "/home/psyduck/Documents/Uploded";
+    private static final Logger logger = LoggerFactory.getLogger(FileStorageService.class);
+
+    // Inject the storage directory from application properties
+    @Value("${file.storage.directory}")
+    private String storageDirectoryPath;
+
+    private Path storageLocation;
 
     @Autowired
     private FileRepository fileRepository;
+
+    @PostConstruct
+    public void init() {
+        this.storageLocation = Paths.get(storageDirectoryPath);
+        initStorageDirectory();
+    }
+
+    private void initStorageDirectory() {
+        try {
+            // Create directories if they don't exist
+            if (!Files.exists(storageLocation)) {
+                logger.info("Creating storage directory: {}", storageLocation);
+                Files.createDirectories(storageLocation);
+                logger.info("Storage directory created successfully");
+            }
+        } catch (IOException e) {
+            logger.error("Could not initialize storage directory: {}", e.getMessage());
+            throw new RuntimeException("Could not initialize storage directory", e);
+        }
+    }
 
     // Save the file into the file system and store the file path in the database
     public String saveFile(MultipartFile fileToSave) throws IOException {
@@ -34,8 +66,8 @@ public class FileStorageService {
         String fileName = System.currentTimeMillis() + "_" + fileToSave.getOriginalFilename();
 
         // Ensure the file path stays within the intended directory (security check)
-        File targetFile = new File(STORAGE_DIRECTORY + File.separator + fileName);
-        if (!Objects.equals(targetFile.getParent(), STORAGE_DIRECTORY)) {
+        File targetFile = new File(storageDirectoryPath + File.separator + fileName);
+        if (!Objects.equals(targetFile.getParent(), storageDirectoryPath)) {
             throw new SecurityException("Unsupported filename!");
         }
 
@@ -88,7 +120,7 @@ public class FileStorageService {
         File fileToDownload = new File(filePath);
 
         // Ensure the file path is valid and within the allowed directory
-        if (!fileToDownload.getCanonicalPath().startsWith(STORAGE_DIRECTORY)) {
+        if (!fileToDownload.getCanonicalPath().startsWith(storageDirectoryPath)) {
             throw new SecurityException("Unsupported filename!");
         }
 

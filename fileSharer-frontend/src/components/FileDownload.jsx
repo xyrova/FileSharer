@@ -13,29 +13,48 @@ const FileDownload = () => {
   const handleDownload = async (event) => {
     event.preventDefault();
     if (!pin) {
-      setError("Please enter the PIN.");
+      setError(import.meta.env.VITE_DOWNLOAD_ERROR_NO_PIN);
       setMessage("");
       return;
     }
 
     try {
       const response = await axios.get(
-        `http://localhost:8080/download?pin=${pin}`,
+        `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_DOWNLOAD_ENDPOINT}?pin=${pin}`,
         {
           responseType: "blob", // Important for file download
         }
       );
+      
+      // Extract filename from Content-Disposition header or use a fallback
+      let filename = "downloaded-file";
+      
+      // Check for the Content-Disposition header
+      const contentDisposition = response.headers["content-disposition"];
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?([^"]*)"?/);
+        if (filenameMatch && filenameMatch[1]) {
+          filename = filenameMatch[1];
+        }
+      }
+      
+      // Alternative: check for a custom header if your backend uses one
+      const originalFilename = response.headers["x-original-filename"];
+      if (originalFilename) {
+        filename = originalFilename;
+      }
+      
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", "downloaded-file");
+      link.setAttribute("download", filename);
       document.body.appendChild(link);
       link.click();
       link.remove();
-      setMessage("Download started!");
+      setMessage(import.meta.env.VITE_DOWNLOAD_SUCCESS_MESSAGE);
       setError(null);
     } catch (err) {
-      setError("Failed to download file. Please check the PIN or expiration.");
+      setError(import.meta.env.VITE_DOWNLOAD_ERROR_FAILED);
       setMessage("");
       console.error("Download error:", err);
     }
