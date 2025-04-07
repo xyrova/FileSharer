@@ -60,32 +60,29 @@ The frontend will be running at `http://localhost:5173`
 
 ### Usage
 
-Upload File
+1. Upload File
 
-      Navigate to the upload page (http://localhost:5173).
-      Upload a file. After the file is uploaded, a PIN will be generated and displayed.
-      Share this PIN with the intended recipient.
+   Navigate to the upload page (`http://localhost:5173`).
+   Upload a file. After the file is uploaded, a PIN will be generated and displayed.
+   Share this PIN with the intended recipient.
 
+2. Download File
 
-Download File
+   The recipient can use the same frontend to input the PIN on the download page (`http://localhost:5173/download`).
+   After entering the correct PIN, they can download the file.
 
-      The recipient can use the same frontend to input the PIN on the download page (http://localhost:5173/download).
-      After entering the correct PIN, they can download the file.
+### API Endpoints
 
+1. File Upload
 
-API Endpoints
-File Upload
+   URL : /upload-file
+   Method : POST
+   Request Body : MultipartFile
+   Response : A unique PIN associated with the uploaded file
 
-      URL : /upload-file
-      Method : POST
-      Request Body : MultipartFile
-      Response : A unique PIN associated with the uploaded file
+2. File Download
 
-
-File Download
-
-      URL : /download
-      Method : GET
-      Query Parameter : pin (The unique PIN to access the file)
-      Response : The requested file for download
-
+   URL : /download
+   Method : GET
+   Query Parameter : pin (The unique PIN to access the file)
+   Response : The requested file for download
